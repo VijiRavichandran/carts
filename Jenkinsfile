@@ -19,7 +19,7 @@ pipeline {
       steps {
         echo 'Packaging carts ...'
         sh 'mvn -DskipTests package'
-        archiveArtifacts(artifacts: '/target/*.jar', fingerprint: true)
+        archiveArtifacts(artifacts: 'target/*.jar', fingerprint: true)
       }
     }
 
