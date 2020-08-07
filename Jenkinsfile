@@ -1,12 +1,13 @@
 pipeline {
-  agent {
-    docker {
-      image 'schoolofdevops/carts-maven'
-    }
-
-  }
+  agent none
   stages {
     stage('Build') {
+      agent {
+        docker {
+          image 'schoolofdevops/carts-maven'
+        }
+
+      }
       steps {
         echo 'Compiling carts ...'
         sh 'mvn compile'
@@ -14,6 +15,12 @@ pipeline {
     }
 
     stage('Test') {
+      agent {
+        docker {
+          image 'schoolofdevops/carts-maven'
+        }
+
+      }
       steps {
         echo 'Testing carts ...'
         sh 'mvn clean test'
@@ -21,10 +28,29 @@ pipeline {
     }
 
     stage('Package') {
+      agent {
+        docker {
+          image 'schoolofdevops/carts-maven'
+        }
+
+      }
       steps {
         echo 'Packaging carts ...'
         sh 'mvn -DskipTests package'
         archiveArtifacts(artifacts: '**/target/*.jar', fingerprint: true)
+      }
+    }
+
+    stage('docker build and publish') {
+      steps {
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
+            def dockerImage = docker.build("vijiravichandran/carts${env.BUILD_ID}", "./")
+            dockerImage.push()
+            dockerImage.push("latest")
+          }
+        }
+
       }
     }
 
